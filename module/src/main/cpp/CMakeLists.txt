@@ -31,6 +31,13 @@ include_directories(
         xdl/include
 )
 
+set(static-lib-location ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+
+add_library(dobby STATIC IMPORTED)
+set_target_properties(dobby
+        PROPERTIES IMPORTED_LOCATION ${static-lib-location}/${ANDROID_ABI}/libdobby.a)
+
+
 aux_source_directory(xdl xdl-src)
 
 add_library(${MODULE_NAME} SHARED
@@ -38,7 +45,7 @@ add_library(${MODULE_NAME} SHARED
         hack.cpp
         il2cpp_dump.cpp
         ${xdl-src})
-target_link_libraries(${MODULE_NAME} log)
+target_link_libraries(${MODULE_NAME} dobby log)
 
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_custom_command(TARGET ${MODULE_NAME} POST_BUILD
