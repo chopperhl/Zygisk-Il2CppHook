@@ -93,10 +93,17 @@ int func1_impl(){
     return 1;
 }
 
+static int (*func2)();
+int func2_impl(){
+    return 1;
+}
+
 void il2cpp_hook() {
     //il2cpp_dump();
-    uint64_t offset = 0x14171e9;
-    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<void (**)()>(&func1));
+    uint64_t offset1 = 0x13f6cf5;
+    uint64_t offset2 = 0x13f6c88;
+    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset1), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<void (**)()>(&func1));
+    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset2), reinterpret_cast<dobby_dummy_func_t>(func2_impl),reinterpret_cast<void (**)()>(&func2));
 }
 
 static void* (*createSkill)(void *data);
