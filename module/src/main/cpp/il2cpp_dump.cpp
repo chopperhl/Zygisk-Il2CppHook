@@ -83,8 +83,7 @@ static const MethodInfo * getData;
 static const MethodInfo * hook1;
 static const MethodInfo * hook2;
 
-uint8_t (*func1)(void *);
-uint8_t func1_impl(void * p){
+install_hook_name(func1,uint8_t,void * p){
     auto skillData = il2cpp_runtime_invoke(getData,p, nullptr, nullptr);
     auto levelField = get_field(skillData->klass,"level");
     auto level = il2cpp_field_get_value_object(levelField,skillData);
@@ -95,15 +94,15 @@ uint8_t func1_impl(void * p){
     return 0;
 }
 
-uint8_t (*func2)(void *);
-uint8_t func2_impl(void * p){
-    return func1_impl(p);
+
+install_hook_name(func2,uint8_t,void * p){
+    return orig_func1(p);
 }
 
 void il2cpp_hook() {
     il2cpp_dump();
-    DobbyHook(reinterpret_cast<void *>(hook1->methodPointer), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<dobby_dummy_func_t *>(&func1));
-    DobbyHook(reinterpret_cast<void *>(hook2->methodPointer), reinterpret_cast<dobby_dummy_func_t>(func2_impl),reinterpret_cast<dobby_dummy_func_t *>(&func2));
+    install_hook_func1(reinterpret_cast<void *>(hook1->methodPointer));
+    install_hook_func2(reinterpret_cast<void *>(hook2->methodPointer));
 }
 
 
