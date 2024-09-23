@@ -1,9 +1,9 @@
 ext {
-    moduleLibraryName = "il2cppdumper"
-    magiskModuleId = "zygisk_il2cppdumper"
-    moduleName = "Il2CppDumper"
-    moduleAuthor = "Perfare"
-    moduleDescription = "Il2CppDumper Zygisk version."
+    moduleLibraryName = "il2cpphook"
+    magiskModuleId = "zygisk_il2cpp_hook"
+    moduleName = "Il2CppHook"
+    moduleAuthor = "chopperhl"
+    moduleDescription = "Il2Cpp Zygisk hook."
     moduleVersion = "v1.2.0"
     moduleVersionCode = 1
 }

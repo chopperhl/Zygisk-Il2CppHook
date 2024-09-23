@@ -45,25 +45,6 @@ void init_il2cpp_api(void *handle) {
 void il2cpp_dump();
 
 
-void dump_method(Il2CppClass *klass) {
-    void *iter = nullptr;
-    while (auto method = il2cpp_class_get_methods(klass, &iter)) {
-
-        uint32_t iflags = 0;
-        auto flags = il2cpp_method_get_flags(method, &iflags);
-        auto return_type = il2cpp_method_get_return_type(method);
-
-        auto return_class = il2cpp_class_from_type(return_type);
-        auto param_count = il2cpp_method_get_param_count(method);
-        for (int i = 0; i < param_count; ++i) {
-            auto param = il2cpp_method_get_param(method, i);
-            auto attrs = param->attrs;
-
-            auto parameter_class = il2cpp_class_from_type(param);
-        }
-    }
-}
-
 
 
 void il2cpp_api_init(void *handle) {
@@ -86,35 +67,55 @@ void il2cpp_api_init(void *handle) {
     auto domain = il2cpp_domain_get();
     il2cpp_thread_attach(domain);
 }
-
-
-static int (*func1)();
-int func1_impl(){
-    return 1;
+FieldInfo* get_field(Il2CppClass *klass,const char * name) {
+    void *iter = nullptr;
+    while (auto field = il2cpp_class_get_fields(klass, &iter)) {
+        auto fieldName = il2cpp_field_get_name(field);
+        if (strcmp(fieldName,name) == 0) {
+            return field;
+        }
+    }
+    return nullptr;
 }
 
-static int (*func2)();
-int func2_impl(){
-    return 1;
+
+static const MethodInfo * getData;
+
+uint8_t (*func1)(void *);
+uint8_t func1_impl(void * p){
+    auto skillData = il2cpp_runtime_invoke(getData,p, nullptr, nullptr);
+    auto levelField = get_field(skillData->klass,"level");
+    auto level = il2cpp_field_get_value_object(levelField,skillData);
+    int * val = static_cast<int32_t *>(il2cpp_object_unbox(level));
+    if (*val > 6){
+        return 1;
+    }
+    return 0;
+}
+
+uint8_t (*func2)(void *);
+uint8_t func2_impl(void * p){
+    return func1_impl(p);
 }
 
 void il2cpp_hook() {
-    //il2cpp_dump();
+    il2cpp_dump();
     uint64_t offset1 = 0x13f6cf5;
     uint64_t offset2 = 0x13f6c88;
-    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset1), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<void (**)()>(&func1));
-    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset2), reinterpret_cast<dobby_dummy_func_t>(func2_impl),reinterpret_cast<void (**)()>(&func2));
+    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset1), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<dobby_dummy_func_t *>(&func1));
+    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset2), reinterpret_cast<dobby_dummy_func_t>(func2_impl),reinterpret_cast<dobby_dummy_func_t *>(&func2));
 }
 
-static void* (*createSkill)(void *data);
 
 void dump_class(Il2CppClass *klass) {
     auto classNamespace = il2cpp_class_get_namespace(klass);
     auto className = il2cpp_class_get_name(klass);
     if (strcmp("BattleController",className) == 0 && strcmp("Torappu.Battle",classNamespace) == 0){
         LOGI("dump class %s",className);
-        auto method = il2cpp_class_get_method_from_name(klass,"CreateSkill",1);
-        //DobbyHook(reinterpret_cast<void *>(method->methodPointer), reinterpret_cast<dobby_dummy_func_t>(createSkill_impl),reinterpret_cast<void (**)()>(&createSkill));
+    }
+    if (strcmp("BasicSkill",className) == 0 && strcmp("Torappu.Battle",classNamespace) == 0){
+        LOGI("dump class %s",className);
+        getData = il2cpp_class_get_method_from_name(klass,"get_data",0);
     }
 }
 

@@ -5,6 +5,7 @@
 #ifndef ZYGISK_IL2CPPDUMPER_GAME_H
 #define ZYGISK_IL2CPPDUMPER_GAME_H
 
-#define GamePackageName "com.hypergryph.arknights.bilibili"
+#define GamePackageName1 "com.hypergryph.arknights.bilibili"
+#define GamePackageName2 "com.hypergryph.arknights"
 
 #endif //ZYGISK_IL2CPPDUMPER_GAME_H
