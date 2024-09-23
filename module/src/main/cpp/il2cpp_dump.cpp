@@ -96,7 +96,7 @@ install_hook_name(func1,uint8_t,void * p){
 
 
 install_hook_name(func2,uint8_t,void * p){
-    return orig_func1(p);
+    return fake_func1(p);
 }
 
 void il2cpp_hook() {
