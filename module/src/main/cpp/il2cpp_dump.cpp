@@ -80,6 +80,8 @@ FieldInfo* get_field(Il2CppClass *klass,const char * name) {
 
 
 static const MethodInfo * getData;
+static const MethodInfo * hook1;
+static const MethodInfo * hook2;
 
 uint8_t (*func1)(void *);
 uint8_t func1_impl(void * p){
@@ -100,10 +102,8 @@ uint8_t func2_impl(void * p){
 
 void il2cpp_hook() {
     il2cpp_dump();
-    uint64_t offset1 = 0x13f6cf5;
-    uint64_t offset2 = 0x13f6c88;
-    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset1), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<dobby_dummy_func_t *>(&func1));
-    DobbyHook(reinterpret_cast<void *>(il2cpp_base + offset2), reinterpret_cast<dobby_dummy_func_t>(func2_impl),reinterpret_cast<dobby_dummy_func_t *>(&func2));
+    DobbyHook(reinterpret_cast<void *>(hook1->methodPointer), reinterpret_cast<dobby_dummy_func_t>(func1_impl),reinterpret_cast<dobby_dummy_func_t *>(&func1));
+    DobbyHook(reinterpret_cast<void *>(hook2->methodPointer), reinterpret_cast<dobby_dummy_func_t>(func2_impl),reinterpret_cast<dobby_dummy_func_t *>(&func2));
 }
 
 
@@ -116,6 +116,8 @@ void dump_class(Il2CppClass *klass) {
     if (strcmp("BasicSkill",className) == 0 && strcmp("Torappu.Battle",classNamespace) == 0){
         LOGI("dump class %s",className);
         getData = il2cpp_class_get_method_from_name(klass,"get_data",0);
+        hook1 = il2cpp_class_get_method_from_name(klass,"get_canCastWithNoSp",0);
+        hook2 = il2cpp_class_get_method_from_name(klass,"get_canSkipReduceSp",0);
     }
 }
 
