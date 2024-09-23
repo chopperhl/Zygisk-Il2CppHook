@@ -116,8 +116,8 @@ void dump_class(Il2CppClass *klass) {
     if (strcmp("BasicSkill",className) == 0 && strcmp("Torappu.Battle",classNamespace) == 0){
         LOGI("dump class %s",className);
         getData = il2cpp_class_get_method_from_name(klass,"get_data",0);
-        hook1 = il2cpp_class_get_method_from_name(klass,"get_canCastWithNoSp",0);
-        hook2 = il2cpp_class_get_method_from_name(klass,"get_canSkipReduceSp",0);
+        hook1 = il2cpp_class_get_method_from_name(klass,"get_canSkipReduceSp",0);
+        hook2 = il2cpp_class_get_method_from_name(klass,"get_canCastWithNoSp",0);
     }
 }
 
