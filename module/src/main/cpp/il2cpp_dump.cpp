@@ -99,6 +99,12 @@ install_hook_name(func2,uint8_t,void * p){
     return fake_func1(p);
 }
 
+
+
+install_hook_name(enemy,int32_t,void * p){
+    return 0;
+}
+
 void il2cpp_hook() {
     il2cpp_dump();
     install_hook_func1(reinterpret_cast<void *>(hook1->methodPointer));
@@ -117,6 +123,11 @@ void dump_class(Il2CppClass *klass) {
         getData = il2cpp_class_get_method_from_name(klass,"get_data",0);
         hook1 = il2cpp_class_get_method_from_name(klass,"get_canSkipReduceSp",0);
         hook2 = il2cpp_class_get_method_from_name(klass,"get_canCastWithNoSp",0);
+    }
+    if (strcmp("Enemy",className) == 0  && strcmp("Torappu.Battle",classNamespace) == 0){
+        auto  lifeReduce = il2cpp_class_get_method_from_name(klass,"get_lifePointReduce",0);
+        install_hook_enemy(reinterpret_cast<void *>(lifeReduce->methodPointer));
+
     }
 }
 
