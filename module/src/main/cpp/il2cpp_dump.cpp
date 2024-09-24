@@ -146,6 +146,7 @@ void logStr(char * formated,Il2CppObject *str)
 
 
 static const MethodInfo * getData;
+static const MethodInfo * getEnemyData;
 static const MethodInfo * hook1;
 static const MethodInfo * hook2;
 
@@ -166,7 +167,7 @@ install_hook_name(func2,uint8_t,void * p){
 
 
 
-install_hook_name(enemy,int32_t,void * p){
+install_hook_name(enemy,int32_t,Il2CppObject * p){
     return 0;
 }
 
@@ -189,6 +190,7 @@ void dump_class(Il2CppClass *klass) {
     if (strcmp("Enemy",className) == 0  && strcmp("Torappu.Battle",classNamespace) == 0){
         LOGI("dump class %s",className);
         auto  lifeReduce = il2cpp_class_get_method_from_name(klass,"get_lifePointReduce",0);
+        getEnemyData = il2cpp_class_get_method_from_name(klass,"get_data",0);
         install_hook_enemy(reinterpret_cast<void *>(lifeReduce->methodPointer));
 
     }
