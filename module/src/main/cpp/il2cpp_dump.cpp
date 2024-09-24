@@ -28,6 +28,15 @@
 #include "dobby.h"
 static uint64_t il2cpp_base = 0;
 
+typedef struct CString
+{
+    void *Empty;
+    void *WhiteChars;
+    int32_t length;
+    char start_char[1];
+} CString;
+
+void il2cpp_dump();
 
 void init_il2cpp_api(void *handle) {
 #define DO_API(r, n, p) {                      \
@@ -41,10 +50,6 @@ void init_il2cpp_api(void *handle) {
 
 #undef DO_API
 }
-
-void il2cpp_dump();
-
-
 
 
 void il2cpp_api_init(void *handle) {
@@ -67,16 +72,77 @@ void il2cpp_api_init(void *handle) {
     auto domain = il2cpp_domain_get();
     il2cpp_thread_attach(domain);
 }
-FieldInfo* get_field(Il2CppClass *klass,const char * name) {
-    void *iter = nullptr;
-    while (auto field = il2cpp_class_get_fields(klass, &iter)) {
-        auto fieldName = il2cpp_field_get_name(field);
-        if (strcmp(fieldName,name) == 0) {
-            return field;
-        }
-    }
-    return nullptr;
+
+ Il2CppObject * getFieldVal(Il2CppObject * obj,char * name){
+     auto field = il2cpp_class_get_field_from_name(obj->klass, name);
+     return  il2cpp_field_get_value_object(field,obj);
 }
+
+int unicode2UTF(long unic, char *pOutput)
+{
+    if (unic >= 0xFFFF0000)
+        unic %= 0xFFFF0000;
+    if (unic <= 0x0000007F)
+    {
+        *pOutput = (unic & 0x7F);
+        return 1;
+    }
+    else if (unic >= 0x00000080 && unic <= 0x000007FF)
+    {
+        *(pOutput + 1) = (unic & 0x3F) | 0x80;
+        *pOutput = ((unic >> 6) & 0x1F) | 0xC0;
+        return 2;
+    }
+    else if (unic >= 0x00000800 && unic <= 0x0000FFFF)
+    {
+        *(pOutput + 2) = (unic & 0x3F) | 0x80;
+        *(pOutput + 1) = ((unic >> 6) & 0x3F) | 0x80;
+        *pOutput = ((unic >> 12) & 0x0F) | 0xE0;
+        return 3;
+    }
+    else if (unic >= 0x00010000 && unic <= 0x001FFFFF)
+    {
+        *(pOutput + 3) = (unic & 0x3F) | 0x80;
+        *(pOutput + 2) = ((unic >> 6) & 0x3F) | 0x80;
+        *(pOutput + 1) = ((unic >> 12) & 0x3F) | 0x80;
+        *pOutput = ((unic >> 18) & 0x07) | 0xF0;
+        return 4;
+    }
+    else if (unic >= 0x00200000 && unic <= 0x03FFFFFF)
+    {
+        *(pOutput + 4) = (unic & 0x3F) | 0x80;
+        *(pOutput + 3) = ((unic >> 6) & 0x3F) | 0x80;
+        *(pOutput + 2) = ((unic >> 12) & 0x3F) | 0x80;
+        *(pOutput + 1) = ((unic >> 18) & 0x3F) | 0x80;
+        *pOutput = ((unic >> 24) & 0x03) | 0xF8;
+        return 5;
+    }
+    else if (unic >= 0x04000000 && unic <= 0x7FFFFFFF)
+    {
+        *(pOutput + 5) = (unic & 0x3F) | 0x80;
+        *(pOutput + 4) = ((unic >> 6) & 0x3F) | 0x80;
+        *(pOutput + 3) = ((unic >> 12) & 0x3F) | 0x80;
+        *(pOutput + 2) = ((unic >> 18) & 0x3F) | 0x80;
+        *(pOutput + 1) = ((unic >> 24) & 0x3F) | 0x80;
+        *pOutput = ((unic >> 30) & 0x01) | 0xFC;
+        return 6;
+    }
+
+    return 0;
+}
+
+void logStr(char * formated,Il2CppObject *str)
+{
+    CString * self = reinterpret_cast<CString *>(str);
+    char *buff = (char *)malloc(self->length * 6);
+    memset(buff,0,self->length * 6);
+    for (int i = 0, off = 0; i < self->length; ++i)
+        off += unicode2UTF(((short *)self->start_char)[i], buff + off);
+
+    LOGD(formated, buff);
+    free(buff);
+}
+
 
 
 static const MethodInfo * getData;
@@ -85,8 +151,7 @@ static const MethodInfo * hook2;
 
 install_hook_name(func1,uint8_t,void * p){
     auto skillData = il2cpp_runtime_invoke(getData,p, nullptr, nullptr);
-    auto levelField = get_field(skillData->klass,"level");
-    auto level = il2cpp_field_get_value_object(levelField,skillData);
+    auto level = getFieldVal(skillData,"level");
     int * val = static_cast<int32_t *>(il2cpp_object_unbox(level));
     if (*val > 6){
         return 1;
@@ -115,9 +180,6 @@ void il2cpp_hook() {
 void dump_class(Il2CppClass *klass) {
     auto classNamespace = il2cpp_class_get_namespace(klass);
     auto className = il2cpp_class_get_name(klass);
-    if (strcmp("BattleController",className) == 0 && strcmp("Torappu.Battle",classNamespace) == 0){
-        LOGI("dump class %s",className);
-    }
     if (strcmp("BasicSkill",className) == 0 && strcmp("Torappu.Battle",classNamespace) == 0){
         LOGI("dump class %s",className);
         getData = il2cpp_class_get_method_from_name(klass,"get_data",0);
@@ -125,6 +187,7 @@ void dump_class(Il2CppClass *klass) {
         hook2 = il2cpp_class_get_method_from_name(klass,"get_canCastWithNoSp",0);
     }
     if (strcmp("Enemy",className) == 0  && strcmp("Torappu.Battle",classNamespace) == 0){
+        LOGI("dump class %s",className);
         auto  lifeReduce = il2cpp_class_get_method_from_name(klass,"get_lifePointReduce",0);
         install_hook_enemy(reinterpret_cast<void *>(lifeReduce->methodPointer));
 
